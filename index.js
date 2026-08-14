@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import userRouter from "./src/routers/user.routers";
 import donorRouter from "./src/routers/donor.routers";
+import recipientRouter from "./src/routers/recipient.routers"
 
 const app = express();
 const port = 8080;
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
 
 app.use("/api", userRouter);
 app.use("/api",donorRouter);
+app.use("/api",recipientRouter);
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
