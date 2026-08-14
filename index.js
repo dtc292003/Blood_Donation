@@ -7,6 +7,8 @@ import donationEventRouter from "./src/routers/donationEvent.routers";
 import donationRegistrationRouter from "./src/routers/donationRegistration.routers";
 import donationRouter from "./src/routers/donation.routers";
 import bloodTestRouter from "./src/routers/bloodTest.routers";
+import bloodRequestRouter from "./src/routers/bloodRequest.routers";
+import matchRouter from "./src/routers/match.router";
 
 const app = express();
 const port = 8080;
@@ -27,6 +29,9 @@ app.use("/api",donationEventRouter);
 app.use("/api",donationRegistrationRouter);
 app.use("/api",donationRouter);
 app.use("/api",bloodTestRouter);
+app.use("/api",bloodRequestRouter);
+app.use("/api", matchRouter);
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
