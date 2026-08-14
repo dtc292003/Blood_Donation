@@ -12,6 +12,7 @@ import matchRouter from "./src/routers/match.router";
 import roleRouter from "./src/routers/role.router";
 import userRoleRouter from "./src/routers/userRole.router";
 import notificationRouter from "./src/routers/notification.router";
+import reportRouter from "./src/routers/report.routers";
 
 const app = express();
 const port = 8080;
@@ -37,6 +38,7 @@ app.use("/api", matchRouter);
 app.use("/api", roleRouter);
 app.use("/api", userRoleRouter);
 app.use("/api", notificationRouter);
+app.use("/api",reportRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
