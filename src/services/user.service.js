@@ -4,12 +4,16 @@ import bcrypt from "bcryptjs";
 const salt = bcrypt.genSaltSync(10);
 
 exports.getAll = async () => {
-  const [row, fields] = await db.execute(`SELECT * FROM USER`);
+  const [row, fields] = await db.execute(
+    `SELECT USERID, USERNAME, EMAIL, FULLNAME, DATEOFBIRTH, GENDER, PHONENUMBER, ADDRESS, PHOTO, CREATEDDATE, UPDATEDDATE FROM USER`
+  );
   return row;
 };
 
 exports.getId = async (id) => {
-  const [row, fields] = await db.execute(`SELECT * FROM USER WHERE USERID = ${id}`);
+  const [row, fields] = await db.execute(
+    `SELECT USERID, USERNAME, EMAIL, FULLNAME, DATEOFBIRTH, GENDER, PHONENUMBER, ADDRESS, PHOTO, CREATEDDATE, UPDATEDDATE FROM USER WHERE USERID = ${id}`
+  );
   return row;
 };
 

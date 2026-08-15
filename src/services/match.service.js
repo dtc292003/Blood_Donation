@@ -1,6 +1,5 @@
 import db from "../config/connectionDB";
 
-// Lấy tất cả match
 exports.getAll = async () => {
   const [row] = await db.execute(
     `SELECT
@@ -41,12 +40,14 @@ exports.getId = async (idMatch) => {
 };
 
 // "Lời mời đã nhận" — recipient xem ai muốn hiến cho request của mình
+// SĐT donor chỉ lộ ra sau khi match đã Accepted
 exports.getByRequest = async (requestId) => {
   const [row] = await db.execute(
     `SELECT
     m.ID_MATCH, m.STATUS, m.MATCH_DATE, m.ACCEPTEDDATE, m.NOTES,
     donor.DONORID, donor.BLOODTYPENAME,
-    donorUser.FULLNAME AS DONORNAME, donorUser.PHONENUMBER AS DONORPHONE
+    donorUser.FULLNAME AS DONORNAME,
+    CASE WHEN m.STATUS = 'Accepted' THEN donorUser.PHONENUMBER ELSE NULL END AS DONORPHONE
     FROM \`MATCH\` m
     JOIN DONOR donor ON m.DONORID = donor.DONORID
     JOIN USER donorUser ON donor.USERID = donorUser.USERID
