@@ -297,21 +297,25 @@ create table ROLE
 /*==============================================================*/
 /* Table: USER                                                  */
 /*==============================================================*/
-create table USER
+CREATE TABLE USER
 (
-   USERID               int not null  comment '',
-   USERNAME             varchar(50)  comment '',
-   EMAIL                varchar(100)  comment '',
-   PASSWORD             varchar(255)  comment '',
-   FULLNAME             varchar(100)  comment '',
-   DATEOFBIRTH          date  comment '',
-   GENDER               varchar(100)  comment '',
-   PHONENUMBER          varchar(15)  comment '',
-   ADDRESS              varchar(255)  comment '',
-   PHOTO                varchar(255)  comment '',
-   CREATEDDATE          datetime  comment '',
-   UPDATEDDATE          datetime  comment '',
-   primary key (USERID)
+    USERID INT NOT NULL AUTO_INCREMENT,
+    USERNAME VARCHAR(50),
+    EMAIL VARCHAR(100),
+    PASSWORD VARCHAR(255),
+    FULLNAME VARCHAR(100),
+    DATEOFBIRTH DATE,
+    GENDER VARCHAR(100),
+    CCCD VARCHAR(12),
+    PHONENUMBER VARCHAR(15),
+    ADDRESS VARCHAR(255),
+    PHOTO LONGBLOB,
+    CREATEDDATE DATETIME,
+    UPDATEDDATE DATETIME,
+    PRIMARY KEY (USERID),
+    UNIQUE (USERNAME),
+    UNIQUE (EMAIL),
+    UNIQUE (CCCD)
 );
 
 /*==============================================================*/
