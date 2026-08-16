@@ -1,5 +1,5 @@
 import ApiError from "../../api-error";
-import ReportServices from "../services/report.serice";
+import ReportServices from "../services/report.service";
 
 exports.getId = async (req, res, next) => {
   if (!req.params.id) return next(new ApiError(400, "Id is require"));

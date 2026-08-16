@@ -69,7 +69,7 @@ exports.add = async (req, res, next) => {
 };
 
 exports.update = async (req, res, next) => {
-  if (!req.body.password || !req.body.email || !req.body.phonenumber) {
+  if (!req.body.email || !req.body.phonenumber) {
     return next(new ApiError(400, "Not enough required fields"));
   }
 
@@ -77,8 +77,10 @@ exports.update = async (req, res, next) => {
     return next(new ApiError(400, "Id is require"));
   }
 
+  const { password, ...safeBody } = req.body;
+
   try {
-    const result = await UserServices.update(req.params.id, req.body);
+    const result = await UserServices.update(req.params.id, safeBody);
     if (result.affectedRows === 0) {
       res.status(404).json({
         errcode: 1,

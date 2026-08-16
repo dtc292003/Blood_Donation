@@ -1,5 +1,6 @@
 import db from "../config/connectionDB";
 
+
 exports.getAll = async () => {
   const [row] = await db.execute(
     `SELECT
@@ -19,7 +20,7 @@ exports.getAll = async () => {
   return row;
 };
 
-// Lấy 1 match theo ID_MATCH
+
 exports.getId = async (idMatch) => {
   const [row] = await db.execute(
     `SELECT
@@ -34,13 +35,13 @@ exports.getId = async (idMatch) => {
     JOIN USER donorUser ON donor.USERID = donorUser.USERID
     JOIN RECIPIENT recipient ON request.RECIPENTID = recipient.RECIPENTID
     JOIN USER recipientUser ON recipient.USERID = recipientUser.USERID
-    WHERE m.ID_MATCH = ${idMatch}`
+    WHERE m.ID_MATCH = ?`,
+    [idMatch]
   );
   return row;
 };
 
-// "Lời mời đã nhận" — recipient xem ai muốn hiến cho request của mình
-// SĐT donor chỉ lộ ra sau khi match đã Accepted
+
 exports.getByRequest = async (requestId) => {
   const [row] = await db.execute(
     `SELECT
@@ -51,13 +52,14 @@ exports.getByRequest = async (requestId) => {
     FROM \`MATCH\` m
     JOIN DONOR donor ON m.DONORID = donor.DONORID
     JOIN USER donorUser ON donor.USERID = donorUser.USERID
-    WHERE m.REQUESTID = ${requestId}
-    ORDER BY m.MATCH_DATE DESC`
+    WHERE m.REQUESTID = ?
+    ORDER BY m.MATCH_DATE DESC`,
+    [requestId]
   );
   return row;
 };
 
-// "Lời mời đã gửi" — donor xem mình đã ứng cứu (apply) cho những request nào
+
 exports.getByDonor = async (donorId) => {
   const [row] = await db.execute(
     `SELECT
@@ -68,63 +70,72 @@ exports.getByDonor = async (donorId) => {
     JOIN BLOOD_REQUEST request ON m.REQUESTID = request.REQUESTID
     JOIN RECIPIENT recipient ON request.RECIPENTID = recipient.RECIPENTID
     JOIN USER recipientUser ON recipient.USERID = recipientUser.USERID
-    WHERE m.DONORID = ${donorId}
-    ORDER BY m.MATCH_DATE DESC`
+    WHERE m.DONORID = ?
+    ORDER BY m.MATCH_DATE DESC`,
+    [donorId]
   );
   return row;
 };
 
-// Donor bấm "Tôi muốn hiến" cho 1 request — giống gửi lời mời kết bạn
+
 exports.apply = async (userId, matchBody) => {
   const [row] = await db.execute(
     `INSERT INTO
       \`MATCH\`(USERID, REQUESTID, DONORID, MATCH_DATE, STATUS, NOTES, CREATEDDATE, UPDATEDDATE)
-      VALUES (${userId}, ${matchBody.requestId}, ${matchBody.donorId}, NOW(), 'Pending', '${matchBody.notes || ""}', NOW(), NOW())`
+      VALUES (?, ?, ?, NOW(), 'Pending', ?, NOW(), NOW())`,
+    [userId, matchBody.requestId, matchBody.donorId, matchBody.notes || ""]
   );
   return row;
 };
 
-// Recipient Accept lời đề nghị hiến máu
+
+exports.getDonorIdByUserId = async (userId) => {
+  const [row] = await db.execute(`SELECT DONORID FROM DONOR WHERE USERID = ?`, [userId]);
+  return row;
+};
+
+
 exports.accept = async (idMatch) => {
   const [row] = await db.execute(
     `UPDATE \`MATCH\`
       SET STATUS = 'Accepted', ACCEPTEDDATE = NOW(), UPDATEDDATE = NOW()
-      WHERE ID_MATCH = ${idMatch}`
+      WHERE ID_MATCH = ?`,
+    [idMatch]
   );
   return row;
 };
 
-// Recipient từ chối
 exports.reject = async (idMatch) => {
   const [row] = await db.execute(
     `UPDATE \`MATCH\`
       SET STATUS = 'Rejected', UPDATEDDATE = NOW()
-      WHERE ID_MATCH = ${idMatch}`
+      WHERE ID_MATCH = ?`,
+    [idMatch]
   );
   return row;
 };
 
-// Donor tự hủy lời đề nghị đã gửi (khi còn Pending)
 exports.cancel = async (idMatch) => {
   const [row] = await db.execute(
     `UPDATE \`MATCH\`
       SET STATUS = 'Cancelled', UPDATEDDATE = NOW()
-      WHERE ID_MATCH = ${idMatch} AND STATUS = 'Pending'`
+      WHERE ID_MATCH = ? AND STATUS = 'Pending'`,
+    [idMatch]
   );
   return row;
 };
 
-// Đánh dấu đã hoàn tất (sau khi donor thực sự hiến máu xong)
 exports.complete = async (idMatch) => {
   const [row] = await db.execute(
     `UPDATE \`MATCH\`
       SET STATUS = 'Completed', UPDATEDDATE = NOW()
-      WHERE ID_MATCH = ${idMatch}`
+      WHERE ID_MATCH = ?`,
+    [idMatch]
   );
   return row;
 };
 
 exports.delete = async (idMatch) => {
-  const [row] = await db.execute(`DELETE FROM \`MATCH\` WHERE ID_MATCH = ${idMatch}`);
+  const [row] = await db.execute(`DELETE FROM \`MATCH\` WHERE ID_MATCH = ?`, [idMatch]);
   return row;
 };

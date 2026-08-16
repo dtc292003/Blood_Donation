@@ -69,12 +69,21 @@ exports.getByEvent = async (req, res, next) => {
 };
 
 exports.add = async (req, res, next) => {
-  if (!req.body.eventId || !req.body.donorId) {
+  if (!req.body.eventId) {
     return next(new ApiError(400, "Not enough required fields"));
   }
 
   try {
-    const result = await DonationRegistrationServices.add(req.body);
+    const donor = await DonationRegistrationServices.getDonorIdByUserId(req.session.userId);
+    if (!donor || donor.length === 0) {
+      return res.status(400).json({
+        errcode: 1,
+        message: "You must register as a donor before registering for an event",
+      });
+    }
+    const donorId = donor[0].DONORID;
+
+    const result = await DonationRegistrationServices.add({ ...req.body, donorId });
     res.status(200).json({
       errcode: 0,
       message: "Add success",

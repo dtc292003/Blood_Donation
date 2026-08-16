@@ -86,12 +86,21 @@ exports.getPending = async (req, res, next) => {
 };
 
 exports.add = async (req, res, next) => {
-  if (!req.body.recipentId || !req.body.requestedVolume || !req.body.neededTime) {
+  if (!req.body.requestedVolume || !req.body.neededTime) {
     return next(new ApiError(400, "Not enough required fields"));
   }
 
   try {
-    const result = await BloodRequestServices.add(req.body);
+    const recipient = await BloodRequestServices.getRecipientIdByUserId(req.session.userId);
+    if (!recipient || recipient.length === 0) {
+      return res.status(400).json({
+        errcode: 1,
+        message: "You must register as a recipient before creating a blood request",
+      });
+    }
+    const recipentId = recipient[0].RECIPENTID;
+
+    const result = await BloodRequestServices.add({ ...req.body, recipentId });
     res.status(200).json({
       errcode: 0,
       message: "Add success",

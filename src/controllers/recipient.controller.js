@@ -48,12 +48,14 @@ exports.getAll = async (req, res, next) => {
 };
 
 exports.add = async (req, res, next) => {
-  if (!req.body.userId || !req.body.reason || !req.body.bloodTypeName) {
+  if (!req.body.reason || !req.body.bloodTypeName) {
     return next(new ApiError(400, "Not enough required fields"));
   }
 
+  const userId = req.session.userId;
+
   try {
-    const result = await RecipientServices.add(req.body.userId, req.body);
+    const result = await RecipientServices.add(userId, req.body);
     res.status(200).json({
       errcode: 0,
       message: "Add success",

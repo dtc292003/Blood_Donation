@@ -1,5 +1,6 @@
 import ApiError from "../../api-error";
 import DonorServices from "../services/donor.service";
+import { isPositiveNumber, isValidBloodType } from "../utils/validators";
 
 exports.getId = async (req, res, next) => {
   if (!req.params.id) {
@@ -65,12 +66,22 @@ exports.getDonorSalient = async (req, res, next) => {
 };
 
 exports.add = async (req, res, next) => {
-  if (!req.body.userId || !req.body.weight || !req.body.height || !req.body.bloodTypeName) {
+  const { weight, height, bloodTypeName } = req.body;
+
+  if (!weight || !height || !bloodTypeName) {
     return next(new ApiError(400, "Not enough required fields"));
   }
+  if (!isPositiveNumber(Number(weight)) || !isPositiveNumber(Number(height))) {
+    return next(new ApiError(400, "Weight and height must be positive numbers"));
+  }
+  if (!isValidBloodType(bloodTypeName)) {
+    return next(new ApiError(400, "Invalid blood type — must be one of A+, A-, B+, B-, AB+, AB-, O+, O-"));
+  }
+
+  const userId = req.session.userId;
 
   try {
-    const result = await DonorServices.add(req.body.userId, req.body);
+    const result = await DonorServices.add(userId, req.body);
     res.status(200).json({
       errcode: 0,
       message: "Add success",
@@ -86,8 +97,16 @@ exports.add = async (req, res, next) => {
 };
 
 exports.update = async (req, res, next) => {
-  if (!req.body.weight || !req.body.height || !req.body.bloodTypeName) {
+  const { weight, height, bloodTypeName } = req.body;
+
+  if (!weight || !height || !bloodTypeName) {
     return next(new ApiError(400, "Not enough required fields"));
+  }
+  if (!isPositiveNumber(Number(weight)) || !isPositiveNumber(Number(height))) {
+    return next(new ApiError(400, "Weight and height must be positive numbers"));
+  }
+  if (!isValidBloodType(bloodTypeName)) {
+    return next(new ApiError(400, "Invalid blood type — must be one of A+, A-, B+, B-, AB+, AB-, O+, O-"));
   }
 
   if (!req.params.id) {

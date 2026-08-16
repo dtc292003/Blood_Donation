@@ -1,7 +1,7 @@
 import db from "../config/connectionDB";
 
 exports.getAll = async () => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `SELECT
     user.USERID,
     user.EMAIL,
@@ -21,7 +21,7 @@ exports.getAll = async () => {
 };
 
 exports.getId = async (id) => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `SELECT
     user.USERID,
     user.EMAIL,
@@ -29,6 +29,7 @@ exports.getId = async (id) => {
     user.FULLNAME,
     user.DATEOFBIRTH,
     user.GENDER,
+    user.CCCD,
     user.PHOTO,
     donor.DONORID,
     donor.WEIGHT,
@@ -36,13 +37,14 @@ exports.getId = async (id) => {
     donor.BLOODTYPENAME
     FROM
     USER user JOIN DONOR donor ON user.USERID = donor.USERID
-    WHERE user.USERID = ${id}`
+    WHERE user.USERID = ?`,
+    [id]
   );
   return row;
 };
 
 exports.getDonorSalient = async () => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `SELECT
     user.USERID,
     user.EMAIL,
@@ -64,28 +66,30 @@ exports.getDonorSalient = async () => {
 };
 
 exports.add = async (userId, donorBody) => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `INSERT INTO
       DONOR(USERID, WEIGHT, HEIGHT, BLOODTYPENAME, CREATEDDATE, UPDATEDDATE)
-      VALUES (${userId}, ${donorBody.weight}, ${donorBody.height}, '${donorBody.bloodTypeName}', NOW(), NOW())`
+      VALUES (?, ?, ?, ?, NOW(), NOW())`,
+    [userId, donorBody.weight, donorBody.height, donorBody.bloodTypeName]
   );
   return row;
 };
 
 exports.update = async (id, donorBody) => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `UPDATE DONOR
       SET
-        WEIGHT = ${donorBody.weight},
-        HEIGHT = ${donorBody.height},
-        BLOODTYPENAME = '${donorBody.bloodTypeName}',
+        WEIGHT = ?,
+        HEIGHT = ?,
+        BLOODTYPENAME = ?,
         UPDATEDDATE = NOW()
-      WHERE USERID = ${id}`
+      WHERE USERID = ?`,
+    [donorBody.weight, donorBody.height, donorBody.bloodTypeName, id]
   );
   return row;
 };
 
 exports.delete = async (id) => {
-  const [row, fields] = await db.execute(`DELETE FROM DONOR WHERE USERID = ${id}`);
+  const [row] = await db.execute(`DELETE FROM DONOR WHERE USERID = ?`, [id]);
   return row;
 };

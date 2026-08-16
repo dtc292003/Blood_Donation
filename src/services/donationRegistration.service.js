@@ -1,7 +1,8 @@
 import db from "../config/connectionDB";
 
+
 exports.getAll = async () => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `SELECT
     reg.REGISTRATIONID,
     reg.REGISTRATIONDATE,
@@ -26,7 +27,7 @@ exports.getAll = async () => {
 };
 
 exports.getId = async (id) => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `SELECT
     reg.REGISTRATIONID,
     reg.REGISTRATIONDATE,
@@ -46,13 +47,14 @@ exports.getId = async (id) => {
     JOIN DONATION_EVENT event ON reg.EVENTID = event.EVENTID
     JOIN DONOR donor ON reg.DONORID = donor.DONORID
     JOIN USER user ON donor.USERID = user.USERID
-    WHERE reg.REGISTRATIONID = ${id}`
+    WHERE reg.REGISTRATIONID = ?`,
+    [id]
   );
   return row;
 };
 
 exports.getByEvent = async (eventId) => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `SELECT
     reg.REGISTRATIONID,
     reg.REGISTRATIONDATE,
@@ -66,35 +68,47 @@ exports.getByEvent = async (eventId) => {
     DONATION_REGISTRATION reg
     JOIN DONOR donor ON reg.DONORID = donor.DONORID
     JOIN USER user ON donor.USERID = user.USERID
-    WHERE reg.EVENTID = ${eventId}`
+    WHERE reg.EVENTID = ?`,
+    [eventId]
   );
   return row;
 };
 
+
+exports.getDonorIdByUserId = async (userId) => {
+  const [row] = await db.execute(`SELECT DONORID FROM DONOR WHERE USERID = ?`, [userId]);
+  return row;
+};
+
 exports.add = async (registrationBody) => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `INSERT INTO
       DONATION_REGISTRATION(EVENTID, DONORID, REGISTRATIONDATE, STATUS, NOTES, CREATEDDATE, UPDATEDDATE)
-      VALUES (${registrationBody.eventId}, ${registrationBody.donorId}, NOW(), '${registrationBody.status || "Pending"}', '${registrationBody.notes || ""}', NOW(), NOW())`
+      VALUES (?, ?, NOW(), ?, ?, NOW(), NOW())`,
+    [
+      registrationBody.eventId,
+      registrationBody.donorId,
+      registrationBody.status || "Pending",
+      registrationBody.notes || "",
+    ]
   );
   return row;
 };
 
 exports.update = async (id, registrationBody) => {
-  const [row, fields] = await db.execute(
+  const [row] = await db.execute(
     `UPDATE DONATION_REGISTRATION
       SET
-        STATUS = '${registrationBody.status}',
-        NOTES = '${registrationBody.notes || ""}',
+        STATUS = ?,
+        NOTES = ?,
         UPDATEDDATE = NOW()
-      WHERE REGISTRATIONID = ${id}`
+      WHERE REGISTRATIONID = ?`,
+    [registrationBody.status, registrationBody.notes || "", id]
   );
   return row;
 };
 
 exports.delete = async (id) => {
-  const [row, fields] = await db.execute(
-    `DELETE FROM DONATION_REGISTRATION WHERE REGISTRATIONID = ${id}`
-  );
+  const [row] = await db.execute(`DELETE FROM DONATION_REGISTRATION WHERE REGISTRATIONID = ?`, [id]);
   return row;
 };

@@ -55,6 +55,19 @@ app.use("/api", roleRouter);
 app.use("/api", userRoleRouter);
 app.use("/api", notificationRouter);
 app.use("/api",reportRouter);
+
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal server error";
+
+  res.status(statusCode).json({
+    errcode: 1,
+    message,
+  });
+});
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });

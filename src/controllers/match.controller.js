@@ -48,11 +48,22 @@ exports.getByDonor = async (req, res, next) => {
 
 // Donor bấm "Tôi muốn hiến"
 exports.apply = async (req, res, next) => {
-  if (!req.body.userId || !req.body.requestId || !req.body.donorId) {
+  if (!req.body.requestId) {
     return next(new ApiError(400, "Not enough required fields"));
   }
+
   try {
-    const result = await MatchServices.apply(req.body.userId, req.body);
+    const userId = req.session.userId;
+    const donor = await MatchServices.getDonorIdByUserId(userId);
+    if (!donor || donor.length === 0) {
+      return res.status(400).json({
+        errcode: 1,
+        message: "You must register as a donor before applying to donate",
+      });
+    }
+    const donorId = donor[0].DONORID;
+
+    const result = await MatchServices.apply(userId, { ...req.body, donorId });
     res.status(200).json({ errcode: 0, message: "Apply success", data: result });
   } catch (error) {
     res.status(500).json({ errcode: 1, message: "Apply fail", error });

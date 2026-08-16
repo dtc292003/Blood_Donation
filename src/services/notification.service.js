@@ -11,22 +11,22 @@ exports.getAll = async () => {
 };
 
 exports.getId = async (id) => {
-  const [row] = await db.execute(`SELECT * FROM NOTIFICATION WHERE NOTIFICATIONID = ${id}`);
+  const [row] = await db.execute(`SELECT * FROM NOTIFICATION WHERE NOTIFICATIONID = ?`, [id]);
   return row;
 };
 
-// Lấy tất cả thông báo của 1 user (đã đọc + chưa đọc)
 exports.getByUser = async (userId) => {
   const [row] = await db.execute(
-    `SELECT * FROM NOTIFICATION WHERE USERID = ${userId} ORDER BY CREATEDDATE DESC`
+    `SELECT * FROM NOTIFICATION WHERE USERID = ? ORDER BY CREATEDDATE DESC`,
+    [userId]
   );
   return row;
 };
 
-// Chỉ lấy thông báo chưa đọc — dùng để hiện badge số lượng
 exports.getUnreadByUser = async (userId) => {
   const [row] = await db.execute(
-    `SELECT * FROM NOTIFICATION WHERE USERID = ${userId} AND ISREAD = 0 ORDER BY CREATEDDATE DESC`
+    `SELECT * FROM NOTIFICATION WHERE USERID = ? AND ISREAD = 0 ORDER BY CREATEDDATE DESC`,
+    [userId]
   );
   return row;
 };
@@ -34,36 +34,38 @@ exports.getUnreadByUser = async (userId) => {
 exports.add = async (notiBody) => {
   const [row] = await db.execute(
     `INSERT INTO NOTIFICATION(USERID, TITLE, CONTENT, NOTIFICATIONTYPE, ISREAD, CREATEDDATE, UPDATEDDATE)
-     VALUES (${notiBody.userId}, '${notiBody.title}', '${notiBody.content || ""}', '${notiBody.notificationType || "General"}', 0, NOW(), NOW())`
+     VALUES (?, ?, ?, ?, 0, NOW(), NOW())`,
+    [notiBody.userId, notiBody.title, notiBody.content || "", notiBody.notificationType || "General"]
   );
   return row;
 };
 
 exports.update = async (id, notiBody) => {
   const [row] = await db.execute(
-    `UPDATE NOTIFICATION SET TITLE = '${notiBody.title}', CONTENT = '${notiBody.content || ""}', UPDATEDDATE = NOW()
-     WHERE NOTIFICATIONID = ${id}`
+    `UPDATE NOTIFICATION SET TITLE = ?, CONTENT = ?, UPDATEDDATE = NOW()
+     WHERE NOTIFICATIONID = ?`,
+    [notiBody.title, notiBody.content || "", id]
   );
   return row;
 };
 
-// Đánh dấu 1 thông báo đã đọc
 exports.markAsRead = async (id) => {
   const [row] = await db.execute(
-    `UPDATE NOTIFICATION SET ISREAD = 1, UPDATEDDATE = NOW() WHERE NOTIFICATIONID = ${id}`
+    `UPDATE NOTIFICATION SET ISREAD = 1, UPDATEDDATE = NOW() WHERE NOTIFICATIONID = ?`,
+    [id]
   );
   return row;
 };
 
-// Đánh dấu tất cả thông báo của 1 user là đã đọc
 exports.markAllAsRead = async (userId) => {
   const [row] = await db.execute(
-    `UPDATE NOTIFICATION SET ISREAD = 1, UPDATEDDATE = NOW() WHERE USERID = ${userId} AND ISREAD = 0`
+    `UPDATE NOTIFICATION SET ISREAD = 1, UPDATEDDATE = NOW() WHERE USERID = ? AND ISREAD = 0`,
+    [userId]
   );
   return row;
 };
 
 exports.delete = async (id) => {
-  const [row] = await db.execute(`DELETE FROM NOTIFICATION WHERE NOTIFICATIONID = ${id}`);
+  const [row] = await db.execute(`DELETE FROM NOTIFICATION WHERE NOTIFICATIONID = ?`, [id]);
   return row;
 };
